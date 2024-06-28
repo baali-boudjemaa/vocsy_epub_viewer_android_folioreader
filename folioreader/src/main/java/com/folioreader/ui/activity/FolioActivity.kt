@@ -16,6 +16,7 @@
 package com.folioreader.ui.activity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.Dialog
@@ -82,10 +83,13 @@ import org.readium.r2.streamer.server.Server
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.zip.Inflater
 import kotlin.math.ceil
 
+@Suppress("DEPRECATION")
 class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback,
     View.OnSystemUiVisibilityChangeListener {
+    private lateinit var gestureDetector: GestureDetector
     private var bookFileName: String? = null
 
     private var mFolioPageViewPager: DirectionalViewpager? = null
@@ -127,6 +131,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
     private var density: Float = 0.toFloat()
     private var topActivity: Boolean? = null
     private var taskImportance: Int = 0
+    val dialog = ModalBottomSheetDialog();
 
     // page count
     private lateinit var pageTrackerViewModel: PageTrackerViewModel
@@ -253,10 +258,8 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Need to add when vector drawables support library is used.
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-
         handler = Handler()
         val display = windowManager.defaultDisplay
         displayMetrics = resources.displayMetrics
@@ -275,6 +278,11 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
         setContentView(R.layout.folio_activity)
         this.savedInstanceState = savedInstanceState
+        gestureDetector = GestureDetector(this, GestureListener())
+
+       // findViewById<View>(android.R.id.content).setOnTouchListener(touchListener)
+        findViewById<View>(android.R.id.content).setOnClickListener(clix)
+
 
         if (savedInstanceState != null) {
             searchAdapterDataBundle = savedInstanceState.getBundle(SearchAdapter.DATA_BUNDLE)
@@ -319,6 +327,99 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
             setupBook()
         }
     }
+    private val clix=View.OnClickListener {
+        supportFragmentManager.let { dialog.show(it, ModalBottomSheetDialog.TAG) }
+
+    }
+    @SuppressLint("ClickableViewAccessibility")
+    private val touchListener = View.OnTouchListener { view, event ->
+        handleTouch(view, event)
+        gestureDetector.onTouchEvent(event)
+    }
+
+    private fun handleTouch(view: View, event: MotionEvent) {
+        gestureDetector.onTouchEvent(event)
+    }
+
+
+
+    inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            Log.i("GestureStatus","onSingleTapUp")
+            return true
+        }
+
+        override fun onLongPress(e: MotionEvent) {
+
+            supportFragmentManager.let { dialog.show(it, ModalBottomSheetDialog.TAG) }
+            Log.i("GestureStatus","onLongPress")
+        }
+
+        override fun onDoubleTap(e: MotionEvent): Boolean {
+            Log.i("GestureStatus","onDoubleTap")
+            return true
+        }
+
+        override fun onDoubleTapEvent(e: MotionEvent): Boolean {
+//            updateGestureStatusText("onDoubleTapEvent")
+            Log.i("GestureStatus","onDoubleTapEvent")
+            return true
+        }
+
+        override fun onDown(e: MotionEvent): Boolean {
+//            updateGestureStatusText("onDown")
+            Log.i("GestureStatus","onDown")
+            return true
+        }
+
+        override fun onShowPress(e: MotionEvent) {
+//            updateGestureStatusText("onShowPress")
+            Log.i("GestureStatus","onShowPress")
+        }
+
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+//            updateGestureStatusText("onSingleTapConfirmed")
+            Log.i("GestureStatus","onSingleTapConfirmed")
+            return true
+        }
+
+        override fun onFling(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            Log.i("GestureStatus","onFling")
+            return true
+        }
+
+        override fun onScroll(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
+            Log.i("GestureStatus","onScroll")
+            return true
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private fun initActionBar() {
         appBarLayout = findViewById(R.id.appBarLayout)
@@ -512,14 +613,16 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
                 return true
             }
             R.id.itemSearch -> {
-                Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
+          /*      Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.title)
                 if (searchUri == null) return true
                 val intent = Intent(this, SearchActivity::class.java)
                 intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spine?.size ?: 0)
                 intent.putExtra(SearchActivity.BUNDLE_SEARCH_URI, searchUri)
                 intent.putExtra(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
                 intent.putExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery)
-                startActivityForResult(intent, RequestCode.SEARCH.value)
+                startActivityForResult(intent, RequestCode.SEARCH.value)*/
+                supportFragmentManager.let { dialog.show(it, ModalBottomSheetDialog.TAG) }
+
                 return true
 
             }
@@ -994,6 +1097,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
 
         mFolioPageViewPager = findViewById(R.id.folioPageViewPager)
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
+
         mFolioPageViewPager!!.setOnPageChangeListener(object :
             DirectionalViewpager.OnPageChangeListener {
             override fun onPageScrolled(
@@ -1044,6 +1148,7 @@ class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControlle
         })
 
         mFolioPageViewPager!!.setDirection(direction)
+        mFolioPageViewPager!!.setOnTouchListener(touchListener);
         mFolioPageFragmentAdapter = FolioPageFragmentAdapter(
             supportFragmentManager, spine, bookFileName, mBookId, pageTrackerViewModel
         )

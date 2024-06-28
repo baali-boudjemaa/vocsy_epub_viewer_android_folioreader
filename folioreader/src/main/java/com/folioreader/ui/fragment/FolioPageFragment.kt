@@ -36,6 +36,7 @@ import com.folioreader.model.locators.ReadLocator
 import com.folioreader.model.locators.SearchLocator
 import com.folioreader.model.sqlite.HighLightTable
 import com.folioreader.ui.activity.FolioActivityCallback
+import com.folioreader.ui.activity.ModalBottomSheetDialog
 import com.folioreader.ui.base.HtmlTask
 import com.folioreader.ui.base.HtmlTaskCallback
 import com.folioreader.ui.base.HtmlUtil
@@ -96,7 +97,7 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
             return fragment
         }
     }
-
+    lateinit var dialog: ModalBottomSheetDialog
     private lateinit var uiHandler: Handler
     private var mHtmlString: String? = null
     private val hasMediaOverlay = false
@@ -353,6 +354,9 @@ class FolioPageFragment(private var pageViewModel: PageTrackerViewModel) : Fragm
     }
 
     fun scrollToLast() {
+
+        dialog=ModalBottomSheetDialog()
+        this.fragmentManager?.let { dialog.show(it.beginTransaction(),ModalBottomSheetDialog.TAG) };
 
         val isPageLoading = loadingView == null || loadingView!!.visibility == View.VISIBLE
         Log.v(LOG_TAG, "-> scrollToLast -> isPageLoading = $isPageLoading")
