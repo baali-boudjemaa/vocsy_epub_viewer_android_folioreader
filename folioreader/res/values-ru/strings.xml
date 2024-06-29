@@ -1,5 +1,5 @@
 <resources>
-
+    <string name="app_name">FolioReader</string>
     <string name="minutes_left">%1$d минуты ·&#160;</string>
     <string name="minute_left">%1$d минута ·&#160;</string>
     <string name="less_than_minute">Меньше минуты ·&#160;</string>
